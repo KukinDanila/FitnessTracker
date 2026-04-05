@@ -46,15 +46,15 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 	return steps, activity, duration, nil
 }
 
-func distance(steps int) float64 {
-	return lenStep * float64(steps) / mInKm
+func distance(steps int, height float64) float64 {
+	return height * stepLengthCoefficient * float64(steps) / mInKm
 }
 
-func meanSpeed(steps int, duration time.Duration) float64 {
+func meanSpeed(steps int, height float64, duration time.Duration) float64 {
 	if duration <= 0 {
 		return 0
 	}
-	return distance(steps) / duration.Hours()
+	return distance(steps, height) / duration.Hours()
 }
 
 func TrainingInfo(data string, weight, height float64) (string, error) {
@@ -64,8 +64,8 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 		return "", err
 	}
 
-	dist := distance(steps)
-	speed := meanSpeed(steps, duration)
+	dist := distance(steps, height)
+	speed := meanSpeed(steps, height, duration)
 
 	var calories float64
 	var errCalc error
@@ -102,7 +102,7 @@ func RunningSpentCalories(steps int, weight, height float64, duration time.Durat
 		return 0.0, fmt.Errorf("продолжительность должна быть больше нуля")
 	}
 
-	speed := meanSpeed(steps, duration)
+	speed := meanSpeed(steps, height, duration)
 	calories := (weight * speed * duration.Minutes()) / minInH
 	return calories, nil
 }
@@ -119,7 +119,7 @@ func WalkingSpentCalories(steps int, weight, height float64, duration time.Durat
 		return 0.0, fmt.Errorf("продолжительность должна быть больше нуля")
 	}
 
-	speed := meanSpeed(steps, duration)
+	speed := meanSpeed(steps, height, duration)
 	calories := (weight * speed * duration.Minutes()) / minInH * walkingCaloriesCoefficient
 	return calories, nil
 }
